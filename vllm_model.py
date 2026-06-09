@@ -54,7 +54,7 @@ class Qwen(object):
        # 加载vLLM大模型
        self.model = LLM(model=model_path,
                             tokenizer=model_path,
-                            tensor_parallel_size=2,     # 如果是多卡，可以自己把这个并行度设置为卡数N
+                            tensor_parallel_size=1,     # 如果是多卡，可以自己把这个并行度设置为卡数N
                             trust_remote_code=True,
                             gpu_memory_utilization=0.8, # 可以根据gpu的利用率自己调整这个比例
                             dtype='half')
@@ -66,15 +66,15 @@ class Qwen(object):
        # LLM的采样参数
        sampling_kwargs = {
             "stop_token_ids": self.stop_words_ids,
-            "early_stopping": False,
-            "top_p": 1.0,
-            "top_k": -1 if self.generation_config.top_k == 0 else self.generation_config.top_k,
-            "temperature": 0.0,
+            # "early_stopping": False,
+            "top_p": 0.9, # 1,
+            "top_k": 50, # -1 if self.generation_config.top_k == 0 else self.generation_config.top_k,
+            "temperature": 0.7, # 0,
             "max_tokens": 2000,
             "repetition_penalty": self.generation_config.repetition_penalty,
             "n":1,
             "best_of":2,
-            "use_beam_search":True
+            # "use_beam_search":True
        }
        self.sampling_params = SamplingParams(**sampling_kwargs)
 
@@ -118,7 +118,7 @@ class ChatLLM(object):
        # 加载vLLM大模型
        self.model = LLM(model=model_path,
                             tokenizer=model_path,
-                            tensor_parallel_size=2,     # 如果是多卡，可以自己把这个并行度设置为卡数N
+                            tensor_parallel_size=1,     # 如果是多卡，可以自己把这个并行度设置为卡数N
                             trust_remote_code=True,
                             gpu_memory_utilization=0.8, # 可以根据gpu的利用率自己调整这个比例
                             dtype='half')
@@ -130,15 +130,15 @@ class ChatLLM(object):
        # LLM的采样参数
        sampling_kwargs = {
             "stop_token_ids": self.stop_words_ids,
-            "early_stopping": False,
-            "top_p": 1.0,
-            # "top_k": -1 if self.generation_config.top_k == 0 else self.generation_config.top_k,
-            "temperature": 0.0,
+            # "early_stopping": False,
+            "top_p": 0.9, # 1.0,
+            "top_k": 50, # -1 if self.generation_config.top_k == 0 else self.generation_config.top_k,
+            "temperature": 0.7, # 0.0,
             "max_tokens": 2000,
-            # "repetition_penalty": self.generation_config.repetition_penalty,
+            "repetition_penalty": 1.2, # self.generation_config.repetition_penalty,
             "n":1,
-            "best_of":2,
-            "use_beam_search":True
+            # "best_of":2,
+            # "use_beam_search":True
        }
        self.sampling_params = SamplingParams(**sampling_kwargs)
 

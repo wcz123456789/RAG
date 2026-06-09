@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
-print(os.environ["CUDA_VISIBLE_DEVICES"])
+# os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
+# print(os.environ["CUDA_VISIBLE_DEVICES"])
 import json
 import jieba
 import pandas as pd
@@ -183,6 +183,17 @@ def parse_pdf(file):
     print("data load ok")
     return data
     
+# 对生成文本做 段落级或句子级去重：
+def deduplicate_text(text):
+    lines = text.split("\n")
+    seen = set()
+    result = []
+    for line in lines:
+        if line not in seen:
+            seen.add(line)
+            result.append(line)
+    return "\n".join(result)
+
 
 if __name__ == "__main__":
     
@@ -195,7 +206,7 @@ if __name__ == "__main__":
 
     # model names
     parser.add_argument('--dense_retriever_lists', type=str, required=False, default='m3e,bge,gte,bce', help='Dense retrieve model lists')
-    parser.add_argument('--reranker_name', type=str, required=False, default='bce', help='Rerank model name')
+    parser.add_argument('--reranker_name', type=str, required=False, default='bge', help='Rerank model name')
     parser.add_argument('--llm_name', type=str, required=False, default='qwen', help='LLM model name')
     
     parser.add_argument('--recursive_answer', action='store_true', help='Rephrase selected document chunks.', default=False)
@@ -214,6 +225,7 @@ if __name__ == "__main__":
     
     retrievers = []
     for embed_model in args.dense_retriever_lists.split(','):
+        print(f"embed_model:{embed_model}")
         retrievers.append(FaissRetriever(embed_model, data))
     print("faissretriever load ok")
     
@@ -236,7 +248,7 @@ if __name__ == "__main__":
     print("rerank model load ok")
     
     llm_dict = {
-        "qwen": (ChatLLM, "pre_train_model/Qwen1.5-7B-Chat"),
+        "qwen": (ChatLLM, "pre_train_model/Qwen2.5-1.5B-Instruct"),
         "baichuan": (ChatLLM, "pre_train_model/Baichuan2-7B-Chat"),
         "chatglm": (Baichuan, "pre_train_model/chatglm3-6b")
     }
@@ -342,6 +354,7 @@ if __name__ == "__main__":
             # print(batch_qa_outputs)
             # print('-----------------')
             for i, qa_output in enumerate(batch_qa_outputs):
+                qa_output = deduplicate_text(qa_output)
                 line[f"answer_{i+1}"] = qa_output # 合并两路召回的结果
             # line["answer_2"] = batch_output[1] # bm召回的结果
             # line["answer_3"] = batch_output[2] # 向量召回的结果

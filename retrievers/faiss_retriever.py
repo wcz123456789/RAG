@@ -23,7 +23,8 @@ class FaissRetriever(object):
         model_path = model_dict[model_name]
         self.embeddings  = HuggingFaceEmbeddings(
                                model_name = model_path,
-                               model_kwargs = {"device":"cuda"}
+                               model_kwargs = {"device":"cuda"},
+                               encode_kwargs = {"batch_size": 64}
                                # model_kwargs = {"device":"cuda:1"}
                            )
         docs = []
@@ -31,9 +32,11 @@ class FaissRetriever(object):
             line = line.strip("\n").strip()
             words = line.split("\t")
             docs.append(Document(page_content=words[0], metadata={"id": idx}))
-        self.vector_store = FAISS.from_documents(docs, self.embeddings)
-        del self.embeddings
-        torch.cuda.empty_cache()
+        # self.vector_store = FAISS.from_documents(docs, self.embeddings)
+        # self.vector_store.save_local("./faiss_index")
+        self.vector_store = FAISS.load_local("./faiss_index", self.embeddings, allow_dangerous_deserialization=True)
+        # del self.embeddings
+        # torch.cuda.empty_cache()
 
     # 获取top-K分数最高的文档块
     def GetTopK(self, query, k):

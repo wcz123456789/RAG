@@ -1,0 +1,4 @@
+/home/cwangeu/.conda/envs/rag/lib/python3.12/site-packages/jieba/_compat.py:18: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+2025-11-23 17:29:57.418 | DEBUG    | text2vec.sentence_model:__init__:80 - Use device: cuda:0
+[W1123 17:29:59.535838879 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
